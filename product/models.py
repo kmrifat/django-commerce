@@ -7,6 +7,9 @@ from tinymce.models import HTMLField
 class Brand(models.Model):
     name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = "brands"
 
@@ -16,6 +19,9 @@ class Category(models.Model):
     description = models.TextField(null=True, blank=True)
     sort_order = models.IntegerField(default=0)
     image = models.ImageField(help_text='Category Image', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = "categories"
@@ -34,15 +40,25 @@ class Product(models.Model):
     visible = models.BooleanField(default=True, help_text='Visible on Storefront')
     description = HTMLField()
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = 'products'
 
 
+def product_directory_path(instance, filename):
+    return 'products/{0}/{1}'.format(instance.product.id, filename)
+
+
 class ProductImage(models.Model):
-    image = models.ImageField()
+    image = models.ImageField(upload_to=product_directory_path)
     description = models.CharField(max_length=255)
     thumbnail = models.BooleanField(default=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.description
 
     class Meta:
         db_table = 'product_images'
@@ -56,6 +72,9 @@ class ProductIdentifier(models.Model):
     bpn = models.CharField(max_length=255, help_text='Bin Picking Number (BPN)', null=True, blank=True)
     product = models.OneToOneField(Product, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.sku
+
     class Meta:
         db_table = 'product_identifier'
 
@@ -66,6 +85,9 @@ class ProductPrice(models.Model):
     msrp = models.FloatField(default=0)
     sale_price = models.FloatField(default=0)
     product = models.OneToOneField(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.default_price)
 
     class Meta:
         db_table = 'product_price'
